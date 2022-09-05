@@ -67,12 +67,12 @@ contract TicketsFacet is IERC1155 {
     ) external override {
         require(_to != address(0), "Tickets: Can't transfer to 0 address");
         
-        require(_from == tx.origin || s.accounts[_from].ticketsApproved[tx.origin], "Tickets: Not approved to transfer");
+        require(_from == msg.sender || s.accounts[_from].ticketsApproved[msg.sender], "Tickets: Not approved to transfer");
         uint256 bal = s.tickets[_id].accountBalances[_from];
         require(bal >= _value, "Tickets: _value greater than balance");
         s.tickets[_id].accountBalances[_from] = bal - _value;
         s.tickets[_id].accountBalances[_to] += _value;
-        emit TransferSingle(tx.origin, _from, _to, _id, _value);
+        emit TransferSingle(msg.sender, _from, _to, _id, _value);
         address marketPlaceDiamond = s.marketPlaceDiamond;
         if (marketPlaceDiamond != address(0)) {
             IERC1155Marketplace(marketPlaceDiamond).updateERC1155Listing(address(this), _id, _from);
@@ -83,7 +83,7 @@ contract TicketsFacet is IERC1155 {
         }
         if (size > 0) {
             require(
-                ERC1155_ACCEPTED == IERC1155TokenReceiver(_to).onERC1155Received(tx.origin, _from, _id, _value, _data),
+                ERC1155_ACCEPTED == IERC1155TokenReceiver(_to).onERC1155Received(msg.sender, _from, _id, _value, _data),
                 "Tickets: Transfer rejected/failed by _to"
             );
         }
@@ -114,7 +114,7 @@ contract TicketsFacet is IERC1155 {
     ) external override {
         require(_to != address(0), "Tickets: Can't transfer to 0 address");
         require(_ids.length == _values.length, "Tickets: _ids not the same length as _values");        
-        require(_from == tx.origin || s.accounts[_from].ticketsApproved[tx.origin], "Tickets: Not approved to transfer");
+        require(_from == msg.sender || s.accounts[_from].ticketsApproved[msg.sender], "Tickets: Not approved to transfer");
         // gas optimization
         unchecked {                    
             for (uint256 i; i < _ids.length; i++) {
@@ -126,7 +126,7 @@ contract TicketsFacet is IERC1155 {
                 s.tickets[id].accountBalances[_to] += value;
             }
         }
-        emit TransferBatch(tx.origin, _from, _to, _ids, _values);
+        emit TransferBatch(msg.sender, _from, _to, _ids, _values);
         address marketPlaceDiamond = s.marketPlaceDiamond;
         if (marketPlaceDiamond != address(0)) {
             IERC1155Marketplace(marketPlaceDiamond).updateBatchERC1155Listing(address(this), _ids, _from);
@@ -137,7 +137,7 @@ contract TicketsFacet is IERC1155 {
         }
         if (size > 0) {
             require(
-                ERC1155_BATCH_ACCEPTED == IERC1155TokenReceiver(_to).onERC1155BatchReceived(tx.origin, _from, _ids, _values, _data),
+                ERC1155_BATCH_ACCEPTED == IERC1155TokenReceiver(_to).onERC1155BatchReceived(msg.sender, _from, _ids, _values, _data),
                 "Tickets: Transfer rejected/failed by _to"
             );
         }
@@ -193,8 +193,8 @@ contract TicketsFacet is IERC1155 {
         @param _approved  True if the operator is approved, false to revoke approval
     */
     function setApprovalForAll(address _operator, bool _approved) external override {        
-        s.accounts[tx.origin].ticketsApproved[_operator] = _approved;
-        emit ApprovalForAll(tx.origin, _operator, _approved);
+        s.accounts[msg.sender].ticketsApproved[_operator] = _approved;
+        emit ApprovalForAll(msg.sender, _operator, _approved);
     }
 
     /**
@@ -226,7 +226,7 @@ contract TicketsFacet is IERC1155 {
                     s.tickets[id].totalSupply += uint96(value);
                 }
             }   
-            emit TransferBatch(tx.origin, address(0), ticketOwner.owner, ticketOwner.ids, ticketOwner.values);
+            emit TransferBatch(msg.sender, address(0), ticketOwner.owner, ticketOwner.ids, ticketOwner.values);
         }
     }
 }
