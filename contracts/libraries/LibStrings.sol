@@ -24,10 +24,12 @@ library LibStrings {
             temp /= 10;
         }
         bytes memory buffer = new bytes(digits);
-        uint256 index = digits - 1;
+        // underflow error fix
+        uint256 index = digits;
         temp = value;
         while (temp != 0) {
-            buffer[index--] = bytes1(uint8(48 + (temp % 10)));
+            index--;
+            buffer[index] = bytes1(uint8(48 + (temp % 10)));
             temp /= 10;
         }
         return string(buffer);
