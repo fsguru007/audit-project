@@ -115,7 +115,7 @@ contract StakingFacet {
                 require(id < 6, "Staking: Ticket not found");
                 uint256 l_ticketCost = ticketCost(id);
                 // check overflow error
-                require(value < 10000, "Max Value overflow")
+                require(value < 10000, "Max Value overflow");
                 uint256 cost = l_ticketCost * value;            
                 require(frensBal >= cost, "Staking: Not enough frens points");
                 frensBal -= cost;
