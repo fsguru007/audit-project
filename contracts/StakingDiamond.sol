@@ -23,7 +23,9 @@ contract StakingDiamond {
     event PoolTokensRate(uint256 _newRate);
 
     struct ConstructorArgs {
-        address owner;        
+        address owner;
+        // Add PoolContract field.
+        address poolContract;        
     }
 
     constructor(IDiamondCut.FacetCut[] memory _diamondCut, ConstructorArgs memory _args) {
@@ -35,6 +37,8 @@ contract StakingDiamond {
 
         s.ticketsBaseUri = "https://mywebsite.com/metadata/";
 
+        // Set PoolContract
+        s.poolContract = _args.poolContract;
         s.poolTokensRate = 14;
         emit PoolTokensRate(14);
 
