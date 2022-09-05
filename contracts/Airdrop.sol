@@ -11,7 +11,7 @@ contract Airdrop {
     ) external {
         require(_receivers.length == _amounts.length, "_receivers.length not the same as _amounts.length");        
         for (uint256 i; i < _receivers.length; i++) {
-            require(IERC20(_token).transferFrom(tx.origin, _receivers[i], _amounts[i]), "Token send failed");
+            require(IERC20(_token).transferFrom(msg.sender, _receivers[i], _amounts[i]), "Token send failed");
         }
     }
 

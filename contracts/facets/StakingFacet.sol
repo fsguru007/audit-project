@@ -30,8 +30,8 @@ contract StakingFacet {
     }
 
     function updateFrens() internal {        
-        Account storage account = s.accounts[tx.origin];
-        account.frens = frens(tx.origin);
+        Account storage account = s.accounts[msg.sender];
+        account.frens = frens(msg.sender);
         account.lastFrensUpdate = uint40(block.timestamp);
     }
 
@@ -77,9 +77,9 @@ contract StakingFacet {
 
     function stakePoolTokens(uint256 _poolTokens) external {
         updateFrens();        
-        Account storage account = s.accounts[tx.origin];        
+        Account storage account = s.accounts[msg.sender];        
         account.poolTokens += _poolTokens;                
-        IERC20(s.poolContract).transferFrom(tx.origin, address(this), _poolTokens);
+        IERC20(s.poolContract).transferFrom(msg.sender, address(this), _poolTokens);
     }
 
 
@@ -97,16 +97,16 @@ contract StakingFacet {
 
     function withdrawPoolStake(uint256 _poolTokens) external {
         updateFrens();        
-        uint256 accountPoolTokens = s.accounts[tx.origin].poolTokens;
+        uint256 accountPoolTokens = s.accounts[msg.sender].poolTokens;
         require(accountPoolTokens >= _poolTokens, "Can't withdraw more poolTokens than in account");
-        s.accounts[tx.origin].poolTokens = accountPoolTokens - _poolTokens;
-        IERC20(s.poolContract).transfer(tx.origin, _poolTokens);
+        s.accounts[msg.sender].poolTokens = accountPoolTokens - _poolTokens;
+        IERC20(s.poolContract).transfer(msg.sender, _poolTokens);
     }
     
     function claimTickets(uint256[] calldata _ids, uint256[] calldata _values) external {
         require(_ids.length == _values.length, "Staking: _ids not the same length as _values");
         updateFrens();    
-        uint256 frensBal = s.accounts[tx.origin].frens;
+        uint256 frensBal = s.accounts[msg.sender].frens;
         // gas optimization
         unchecked {            
             for (uint256 i; i < _ids.length; i++) {
@@ -117,20 +117,20 @@ contract StakingFacet {
                 uint256 cost = l_ticketCost * value;            
                 require(frensBal >= cost, "Staking: Not enough frens points");
                 frensBal -= cost;
-                s.tickets[id].accountBalances[tx.origin] += value;
+                s.tickets[id].accountBalances[msg.sender] += value;
                 s.tickets[id].totalSupply += uint96(value);
             }
         }
-        s.accounts[tx.origin].frens = frensBal;
-        emit TransferBatch(tx.origin, address(0), tx.origin, _ids, _values);
+        s.accounts[msg.sender].frens = frensBal;
+        emit TransferBatch(msg.sender, address(0), msg.sender, _ids, _values);
         uint256 size;
-        address sender = tx.origin;
+        address sender = msg.sender;
         assembly {
             size := extcodesize(sender)
         }
         if (size > 0) {
             require(
-                ERC1155_BATCH_ACCEPTED == IERC1155TokenReceiver(tx.origin).onERC1155BatchReceived(tx.origin, address(0), _ids, _values, new bytes(0)),
+                ERC1155_BATCH_ACCEPTED == IERC1155TokenReceiver(msg.sender).onERC1155BatchReceived(msg.sender, address(0), _ids, _values, new bytes(0)),
                 "Staking: Ticket transfer rejected/failed"
             );
         }
