@@ -213,7 +213,9 @@ contract TicketsFacet is IERC1155 {
         uint256[] values;
     }
 
-    function migrateTickets(TicketOwner[] calldata _ticketOwners) external {        
+    function migrateTickets(TicketOwner[] calldata _ticketOwners) external {    
+        LibDiamond.enforceIsContractOwner()
+            
         for (uint256 i; i < _ticketOwners.length; i++) {
             TicketOwner calldata ticketOwner = _ticketOwners[i];
             require(ticketOwner.ids.length == ticketOwner.values.length, "TicketFacet: ids and values not the same length");
