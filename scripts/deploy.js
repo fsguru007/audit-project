@@ -12,6 +12,8 @@ const diamond = require('diamond-util')
 // const { ethers } = require('ethers')
 // const diamond = require('./diamond-util.js')
 
+const PoolContract = '0x6B175474E89094C44Da98b954EedeAC495271d0F' // DAI
+
 async function main () {
   // Buidler always runs the compile task when running scripts through it.
   // If this runs in a standalone fashion you may want to call compile manually
@@ -29,9 +31,10 @@ async function main () {
       'DiamondLoupeFacet',
       'OwnershipFacet',
       'StakingFacet',
-      'TicketsFacet'
+      'TicketsFacet',
+      'ERC721Facet'
     ],
-    args: [account]
+    args: [account, PoolContract]
   })
 }
 
